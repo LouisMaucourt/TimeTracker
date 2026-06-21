@@ -23,6 +23,10 @@ body{margin: 0px;}
   pointer-events: none;
 } */
 
+  @keyframes fineFade {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.9; }
+  }
 @keyframes slide {
   from {
     background-position: 0 0;

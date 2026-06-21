@@ -4,7 +4,7 @@ import { Timer } from "./components/Timer";
 export function App() {
 
   return (
-    <div className="z-10">
+    <div className="">
       <Timer/>
     </div>
   );

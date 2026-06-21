@@ -15,7 +15,7 @@ export const saveTime = (time: number, id: string, name:string) => {
     const existingStorage = localStorage.getItem(key)
     const data: DayEntry[] = existingStorage ? JSON.parse(existingStorage) : []
 
-    const today = new Date().toISOString().split("T")[0]
+    const today = new Date().toLocaleDateString("fr-FR") 
 
     let day = data.find(d => d.date === today)
 
