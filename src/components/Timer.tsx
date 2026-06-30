@@ -6,19 +6,21 @@
     import { Plus } from 'lucide-react'
     import { saveTime } from '@/utilis/time';
 
-    type Timer = {
-        id: string
-        name: string
-        time: number
-        isRunning: boolean
-    }
+type Timer = {
+    id: string
+    name: string
+    time: number
+    isRunning: boolean
+    startedAt: number | null // Date.now() au moment du dernier "start"
+}
 
-    const createTimer = (): Timer => ({
-        id: crypto.randomUUID(),
-        name: 'travail',
-        time: 0,
-        isRunning: false,
-    })
+const createTimer = (): Timer => ({
+    id: crypto.randomUUID(),
+    name: 'travail',
+    time: 0,
+    isRunning: false,
+    startedAt: null,
+})
 
     export const Timer = () => {
         const [distractionHours, setDistractionHours] = useState<number>(0)
@@ -31,9 +33,15 @@
         const deleteTimer = (id: string) => setTimers(prev => prev.filter(t => t.id !== id))
         const toggleTimer = (id: string) =>
             setTimers(prev =>
-                prev.map(t =>
-                    t.id === id ? { ...t, isRunning: !t.isRunning } : t
-                )
+                prev.map(t => {
+                    if (t.id !== id) return t
+                    if (t.isRunning) {
+                        const elapsed = t.startedAt ? Date.now() - t.startedAt : 0
+                        return { ...t, isRunning: false, time: t.time + elapsed, startedAt: null }
+                    } else {
+                        return { ...t, isRunning: true, startedAt: Date.now() }
+                    }
+                })
             )
         const renameTimer = (id: string, name: string) =>
             setTimers(prev =>
@@ -50,10 +58,12 @@
             setDistractionMinutes(0)
             if (timers.length > 1) deleteTimer(id)
         }
+        const displayTime = (t: Timer) =>
+            t.isRunning && t.startedAt ? t.time + (Date.now() - t.startedAt) : t.time
 
         useEffect(() => {
             const interval = setInterval(() => {
-                setTimers(prev => prev.map(t => (t.isRunning ? { ...t, time: t.time + 100 } : t)))
+                setTimers(prev => [...prev])
             }, 100)
             return () => clearInterval(interval)
         }, [])
@@ -78,7 +88,7 @@
                     {timers.map(timer => (
                         <div key={timer.id} className="p-4 text-center flex flex-col relative">
                             <TimerName id={timer.id} name={timer.name} onUpdate={renameTimer} />
-                            <TimerClock time={timer.time} scale={1 / timers.length} />
+                            <TimerClock time={displayTime(timer)} scale={1 / timers.length} />
                             <TimerControls
                                 id={timer.id}
                                 isRunning={timer.isRunning}
